@@ -1,0 +1,43 @@
+name: Run Bull Controls 2013-2014 and 2017
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bull_controls_2013_2014_2017.py"
+      - ".github/workflows/bull_controls_2013_2014_2017.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests yfinance
+
+      - name: Run frozen V0.1 bull controls
+        run: python bull_controls_2013_2014_2017.py
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+          else
+            git commit -m "Add frozen V0.1 bull-control results"
+            git push
+          fi
