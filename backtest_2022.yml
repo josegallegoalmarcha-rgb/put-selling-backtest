@@ -1,0 +1,43 @@
+name: Run Layer 1 Backtest 2022
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backtest_2022.py"
+      - ".github/workflows/backtest_2022.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas numpy yfinance
+
+      - name: Run frozen V0.1 on 2022
+        run: python backtest_2022.py
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+          else
+            git commit -m "Add V0.1 2022 backtest results"
+            git push
+          fi
