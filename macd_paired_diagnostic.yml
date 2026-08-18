@@ -1,0 +1,43 @@
+name: Run MACD Paired Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "macd_paired_diagnostic.py"
+      - ".github/workflows/macd_paired_diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests yfinance
+
+      - name: Run common-candidate MACD diagnostic
+        run: python macd_paired_diagnostic.py
+
+      - name: Commit diagnostic results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+          else
+            git commit -m "Add paired MACD diagnostic across four windows"
+            git push
+          fi
