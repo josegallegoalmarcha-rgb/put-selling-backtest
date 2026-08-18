@@ -139,7 +139,14 @@ def cluster_bootstrap_one(g: pd.DataFrame, reps=BOOT_REPS, seed=SEED) -> dict:
     # signal as independent.
     rng = np.random.default_rng(seed)
     x = g.copy()
-    x["cluster"] = pd.to_datetime(x["signal_date"]).dt.strftime("%Y-%m-%d")
+    # For a single historical window, the signal date itself is the cluster.
+    # For the pooled four-window test, bootstrap_table() supplies an explicit
+    # cluster_key = window + date so identical calendar dates from different
+    # historical windows remain separate.
+    if "cluster_key" in x.columns:
+        x["cluster"] = x["cluster_key"].astype(str)
+    else:
+        x["cluster"] = pd.to_datetime(x["signal_date"]).dt.strftime("%Y-%m-%d")
     clusters = x["cluster"].unique().tolist()
 
     stats = {"stop":[], "hit3":[], "ret20":[]}
@@ -185,7 +192,7 @@ def bootstrap_table(ev: pd.DataFrame) -> pd.DataFrame:
     # pooled: window+date cluster prevents same calendar date in different
     # historical windows being treated as same cluster.
     pooled = ev.copy()
-    pooled["signal_date"] = (
+    pooled["cluster_key"] = (
         pooled["window"].astype(str) + "__" +
         pd.to_datetime(pooled["signal_date"]).dt.strftime("%Y-%m-%d")
     )
