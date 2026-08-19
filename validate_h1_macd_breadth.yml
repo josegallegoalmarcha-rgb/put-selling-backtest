@@ -1,0 +1,43 @@
+name: Run H1 MACD Breadth Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "validate_h1_macd_breadth.py"
+      - ".github/workflows/validate_h1_macd_breadth.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas numpy yfinance statsmodels
+
+      - name: Run independent H1 validation
+        run: python validate_h1_macd_breadth.py
+
+      - name: Commit validation results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+          else
+            git commit -m "Add independent MACD breadth H1 validation"
+            git push
+          fi
