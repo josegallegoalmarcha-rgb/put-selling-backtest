@@ -1,0 +1,6 @@
+criterion,passed
+low_breadth_pooled_ret20_positive,True
+low_breadth_ret20_greater_than_high_breadth,False
+continuous_interaction_ret20_negative,False
+low_breadth_cross_window_consistency,True
+FINAL_VERDICT,PARTIAL_NOT_ENOUGH_FOR_V02C
